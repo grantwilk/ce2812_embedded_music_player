@@ -10,6 +10,9 @@
 # include "music_player.h"
 # include "note_buffer.h"
 
+/**
+ * The queue of notes to be played
+ */
 note_buffer note_queue;
 
 /**
@@ -23,16 +26,16 @@ void mp_init(void) {
  * Starts playing the notes currently queued in the internal note buffer
  */
 void mp_play(void) {
-    // enable TIM4 interrupts
-    TIM4->DIER |= TIM_DIER_CC1IE;
+    // enable TIM6 interrupts
+    TIM6->DIER |= TIM_DIER_CC1IE;
 }
 
 /**
  * Stops playing notes
  */
 void mp_stop(void) {
-    // disable TIM4 interrupts
-    TIM4->DIER &= ~(TIM_DIER_CC1IE);
+    // disable TIM6 interrupts
+    TIM6->DIER &= ~(TIM_DIER_CC1IE);
 }
 
 /**
@@ -67,9 +70,9 @@ void mp_clear(void) {
 }
 
 /**
- * TIM4 Interrupt Request Handler
+ * TIM6 Interrupt Request Handler
  */
-void TIM4_IRQHandler(void) {
+void TIM6_IRQHandler(void) {
 
     // if note in note buffer
     if (!nb_isempty(&note_queue)) {
@@ -79,8 +82,8 @@ void TIM4_IRQHandler(void) {
 
     // otherwise
     else {
-        // disable TIM4 interrupts
-        TIM4->DIER &= ~(TIM_DIER_CC1IE);
+        // disable TIM6 interrupts
+        TIM6->DIER &= ~(TIM_DIER_CC1IE);
     }
 
 }
