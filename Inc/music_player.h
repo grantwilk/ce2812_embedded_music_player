@@ -1,9 +1,9 @@
 /**
-  * @file music_player.h
+  * @file music_player.c
   * @author Grant Wilk
-  * @created 2/9/2020
-  * @modified 2/9/2020
-  * @brief an API for playing music using a piezo buzzer.
+  * @created 2/09/2020
+  * @modified 2/10/2020
+  * @brief an API for playing music using two piezo buzzers
   */
 
 # ifndef MUSIC_PLAYER_H

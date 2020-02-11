@@ -1,8 +1,8 @@
 /**
   * @file note_buffer.c
   * @author Grant Wilk
-  * @created 2/9/2020
-  * @modified 2/9/2020
+  * @created 2/09/2020
+  * @modified 2/09/2020
   * @brief a circular queue for buffering notes
   */
 

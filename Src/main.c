@@ -1,28 +1,31 @@
-/* Includes ------------------------------------------------------------------*/
+/**
+ * @file main.c
+ * @author Grant Wilk
+ * @created 2/09/2020
+ * @modified 2/11/2020
+ * @brief a music player application
+ */
+
 # include "main.h"
 # include "music_player.h"
 
-/* Private variables ---------------------------------------------------------*/
+/**
+ * Private variables
+ */
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 
-
-/* Private function prototypes -----------------------------------------------*/
+/**
+ * Function prototypes
+ */
 void SystemClock_Config(void);
-
 static void MX_GPIO_Init(void);
-
 static void MX_TIM2_Init(void);
-
 static void MX_TIM3_Init(void);
-
 static void MX_TIM4_Init(void);
-
 static void MX_TIM5_Init(void);
-
-/* Main -----------------------------------------------------------------------*/
 
 /**
  * The application entry point
@@ -191,18 +194,15 @@ int main(void) {
 }
 
 /**
- *
+ * Configures the system clock with CubeMX settings
  */
 void SystemClock_Config(void) {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-    /** Configure the main internal regulator output voltage
-    */
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-    /** Initializes the CPU, AHB and APB busses clocks
-    */
+
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -210,8 +210,7 @@ void SystemClock_Config(void) {
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         Error_Handler();
     }
-    /** Initializes the CPU, AHB and APB busses clocks
-    */
+
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
                                   | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
@@ -225,10 +224,8 @@ void SystemClock_Config(void) {
 }
 
 /**
-  * @brief TIM2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * Configures TIM2 with CubeMX settings
+ */
 static void MX_TIM2_Init(void) {
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
@@ -259,10 +256,8 @@ static void MX_TIM2_Init(void) {
 }
 
 /**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * Configures TIM3 with CubeMX settings
+ */
 static void MX_TIM3_Init(void) {
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
@@ -306,10 +301,8 @@ static void MX_TIM3_Init(void) {
 }
 
 /**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * Configures TIM4 with CubeMX settings
+ */
 static void MX_TIM4_Init(void) {
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
@@ -387,10 +380,8 @@ static void MX_TIM5_Init(void) {
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * Configures GPIO ports with CubeMX settings
+ */
 static void MX_GPIO_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -419,9 +410,8 @@ static void MX_GPIO_Init(void) {
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * This function is executed in the case of an error occurrance
+ */
 void Error_Handler(void) {
 }
 

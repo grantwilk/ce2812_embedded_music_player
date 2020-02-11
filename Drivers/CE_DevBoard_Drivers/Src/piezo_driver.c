@@ -1,9 +1,9 @@
 /**
  * @file piezo_driver.h
  * @author Grant Wilk
- * @created 2/9/2020
- * @modified 2/9/2020
- * @brief a driver for playing tones on a piezo buzzer.
+ * @created 2/09/2020
+ * @modified 2/10/2020
+ * @brief a driver for playing tones on two piezo buzzers
  */
 
 # include <stm32f446xx.h>
