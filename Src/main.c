@@ -1,24 +1,34 @@
-
-
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+# include "main.h"
+# include "music_player.h"
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim5;
+
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
 static void MX_GPIO_Init(void);
+
+static void MX_TIM2_Init(void);
+
 static void MX_TIM3_Init(void);
-static void MX_TIM6_Init(void);
+
+static void MX_TIM4_Init(void);
+
+static void MX_TIM5_Init(void);
+
+/* Main -----------------------------------------------------------------------*/
 
 /**
-  * The application entry point.
-  * @return execution status
-  */
+ * The application entry point
+ * @return execution status
+ */
 int main(void) {
-
     // reset peripherals, initialize flash interface, and initialize systick
     HAL_Init();
 
@@ -27,15 +37,162 @@ int main(void) {
 
     // initialize peripherals
     MX_GPIO_Init();
+    MX_TIM2_Init();
     MX_TIM3_Init();
-    MX_TIM6_Init();
+    MX_TIM4_Init();
+    MX_TIM5_Init();
+
+    // configure user button as input
+    GPIOC->MODER |= (GPIO_MODE_INPUT << GPIO_MODER_MODER13_Pos);
+    GPIOC->PUPDR |= (GPIO_PULLUP << GPIO_PUPDR_PUPD13_Pos);
+
+    while (1) {
+
+        // wait for the button to be pressed
+        while (GPIOC->IDR & GPIO_IDR_ID13);
+
+        // initialize music player
+        mp_init();
+
+        // the notes of the song
+        mp_note notes[] = {
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_KICK},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_HAT},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   440, MP_INSTR_KICK},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   392, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_KICK},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 740, MP_INSTR_HAT},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER + MP_NOTE_EIGTH, 370, MP_INSTR_KICK},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   294, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_KICK},
+
+                {MP_INSTR_KICK, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   392, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 370, MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   294, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER + MP_NOTE_EIGTH, 370, MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 740, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 392, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_WHOLE,   370, MP_INSTR_NONE},
+
+                {MP_INSTR_KICK, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 740, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 392, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER + MP_NOTE_EIGTH, 740, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   880, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_HALF,    740, MP_INSTR_NONE},
+
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 740, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 659, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 440, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 588, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 494, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_QUARTER, 392, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_WHOLE,   370, MP_INSTR_NONE},
+
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER + MP_NOTE_EIGTH, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   294, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_WHOLE,   370, MP_INSTR_NONE},
+
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+                {MP_INSTR_REST, MP_NOTE_QUARTER, 0,   MP_INSTR_NONE},
+
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   370, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   294, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_EIGTH,   330, MP_INSTR_NONE},
+                {MP_INSTR_KEYS, MP_NOTE_WHOLE,   294, MP_INSTR_NONE},
+                {MP_INSTR_KICK, MP_NOTE_EIGTH,   0,   MP_INSTR_NONE},
+
+                {MP_INSTR_END}
+
+        };
+
+        mp_song song = {notes};
+
+        mp_add_song(&song);
+
+        mp_play();
+
+    }
 
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ *
+ */
 void SystemClock_Config(void) {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
@@ -68,23 +225,50 @@ void SystemClock_Config(void) {
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void) {
+
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+    htim2.Instance = TIM2;
+    htim2.Init.Prescaler = 16000;
+    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim2.Init.Period = 0;
+    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    // enable output compare on TIM2 channel 1
+    TIM2->CCER |= TIM_CCER_CC1E;
+
+}
+
+/**
   * @brief TIM3 Initialization Function
   * @param None
   * @retval None
   */
 static void MX_TIM3_Init(void) {
 
-    /* USER CODE BEGIN TIM3_Init 0 */
-
-    /* USER CODE END TIM3_Init 0 */
-
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     TIM_OC_InitTypeDef sConfigOC = {0};
 
-    /* USER CODE BEGIN TIM3_Init 1 */
-
-    /* USER CODE END TIM3_Init 1 */
     htim3.Instance = TIM3;
     htim3.Init.Prescaler = 400;
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -113,45 +297,92 @@ static void MX_TIM3_Init(void) {
     if (HAL_TIM_OC_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
         Error_Handler();
     }
-    /* USER CODE BEGIN TIM3_Init 2 */
 
-    /* USER CODE END TIM3_Init 2 */
     HAL_TIM_MspPostInit(&htim3);
+
+    // enable output compare on TIM3 channel 1
+    TIM3->CCER |= TIM_CCER_CC1E;
 
 }
 
 /**
-  * @brief TIM6 Initialization Function
+  * @brief TIM4 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM6_Init(void) {
+static void MX_TIM4_Init(void) {
 
-    /* USER CODE BEGIN TIM6_Init 0 */
-
-    /* USER CODE END TIM6_Init 0 */
-
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_OC_InitTypeDef sConfigOC = {0};
 
-    /* USER CODE BEGIN TIM6_Init 1 */
-
-    /* USER CODE END TIM6_Init 1 */
-    htim6.Instance = TIM6;
-    htim6.Init.Prescaler = 16000;
-    htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim6.Init.Period = 250;
-    htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
+    htim4.Instance = TIM4;
+    htim4.Init.Prescaler = 400;
+    htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim4.Init.Period = 91;
+    htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim4) != HAL_OK) {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_TIM_OC_Init(&htim4) != HAL_OK) {
         Error_Handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK) {
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK) {
         Error_Handler();
     }
-    /* USER CODE BEGIN TIM6_Init 2 */
+    sConfigOC.OCMode = TIM_OCMODE_TOGGLE;
+    sConfigOC.Pulse = 0;
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    if (HAL_TIM_OC_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
+        Error_Handler();
+    }
 
-    /* USER CODE END TIM6_Init 2 */
+    HAL_TIM_MspPostInit(&htim4);
+
+    // enable output compare on TIM4 channel 1
+    TIM4->CCER |= TIM_CCER_CC1E;
+
+}
+
+/**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void) {
+
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+    htim5.Instance = TIM5;
+    htim5.Init.Prescaler = 16000;
+    htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim5.Init.Period = 0;
+    htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim5) != HAL_OK) {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    // enable output compare on TIM5 channel 1
+    TIM5->CCER |= TIM_CCER_CC1E;
 
 }
 
@@ -192,10 +423,6 @@ static void MX_GPIO_Init(void) {
   * @retval None
   */
 void Error_Handler(void) {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-
-    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT

@@ -30,7 +30,7 @@ note_buffer nb_init(void) {
  * @param nb - the note buffer to push into
  * @param n - the note to push into the buffer
  */
-void nb_push(note_buffer *nb, note n) {
+void nb_push(note_buffer *nb, mp_note n) {
 
     // push the character into the queue then increment the pusher
     nb->buffer[(nb->pusher)++] = n;
@@ -50,10 +50,10 @@ void nb_push(note_buffer *nb, note n) {
  * @param nb - the note buffer to pull from
  * @return the pulled note
  */
-note nb_pull(note_buffer *nb) {
+mp_note nb_pull(note_buffer *nb) {
 
     // pull the note out of the queue and increment the puller
-    note n = nb->buffer[(nb->puller)++];
+    mp_note n = nb->buffer[(nb->puller)++];
 
     // if the pusher passes the end of the buffer, put it back at the start of the buffer
     if (nb->puller == NOTE_BUFFER_SIZE) nb->puller = 0;

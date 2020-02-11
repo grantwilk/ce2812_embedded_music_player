@@ -6,7 +6,11 @@
   * @brief a circular queue for buffering notes
   */
 
-#include "songs.h"
+# ifndef NOTEBUFFER_H
+# define NOTEBUFFER_H
+# endif
+
+# include "music_player_types.h"
 
 # define NOTE_BUFFER_SIZE 256
 # define DEFAULT_PUSHER_POS 0
@@ -22,7 +26,7 @@ typedef struct {
     unsigned int puller;
     int isempty;
     int isfull;
-    note buffer[NOTE_BUFFER_SIZE];
+    mp_note buffer[NOTE_BUFFER_SIZE];
 } note_buffer;
 
 /**
@@ -36,14 +40,14 @@ note_buffer nb_init(void);
  * @param nb - the note buffer to push into
  * @param n - the note to push into the buffer
  */
-void nb_push(note_buffer *nb, note n);
+void nb_push(note_buffer *nb, mp_note n);
 
 /**
  * Pulls the next element from the note buffer
  * @param nb - the note buffer to pull from
  * @return the pulled note
  */
-note nb_pull(note_buffer *nb);
+mp_note nb_pull(note_buffer *nb);
 
 /**
  * Clears all values from the note buffer

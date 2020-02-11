@@ -1,16 +1,16 @@
 /**
-  * @file piezo.h
+  * @file music_player.h
   * @author Grant Wilk
   * @created 2/9/2020
   * @modified 2/9/2020
-  * @brief A driver for generating tones on the piezo buzzer.
+  * @brief an API for playing music using a piezo buzzer.
   */
 
-#ifndef CE2812_WK08_LAB_PIEZO_H
-#define CE2812_WK08_LAB_PIEZO_H
-#endif //CE2812_WK08_LAB_PIEZO_H
+# ifndef MUSIC_PLAYER_H
+# define MUSIC_PLAYER_H
+# endif
 
-#include "songs.h"
+# include "note_buffer.h"
 
 /**
  * Initializes the internal note buffer
@@ -25,21 +25,28 @@ void mp_play(void);
 /**
  * Stops playing notes
  */
-void mp_stop(void);
+void mp_stop();
 
 /**
  * Queues a note to play on the piezo buzzer
  * @param n - the note to queue
  */
-void mp_add_note(note n);
+void mp_add_note(mp_note * n);
 
 /**
  * Queues a song to play using the piezo buzzer
  * @param s - the song to queue
  */
-void mp_add_song(song s);
+void mp_add_song(mp_song * s);
 
 /**
  * Clears all notes from the note queue
  */
 void mp_clear(void);
+
+/**
+ * Converts a non-keys note to a keys note
+ * @param n - the note to convert
+ * @return the converted note
+ */
+void mp_conv_to_keys(mp_note * n);
