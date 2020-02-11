@@ -170,8 +170,10 @@ void TIM2_IRQHandler(void) {
     // if BUZZER1 is not busy and there is a note in the note buffer
     if (!piezo_busy(BUZZER1) && !nb_isempty(&note_queue)) {
 
-        // set the next note
+        // get the next note
         mp_note n = nb_pull(&note_queue);
+
+        // set the next note
         piezo_set(BUZZER0, n.duration, n.frequency);
         piezo_set(BUZZER1, n.dual_duration, n.dual_frequency);
 
@@ -195,8 +197,10 @@ void TIM5_IRQHandler(void) {
     // if BUZZER0 is not busy and there is a note in the note buffer
     if (!piezo_busy(BUZZER0) && !nb_isempty(&note_queue)) {
 
-        // set the next note
+        // get the next note
         mp_note n = nb_pull(&note_queue);
+
+        // set the next note
         piezo_set(BUZZER0, n.duration, n.frequency);
         piezo_set(BUZZER1, n.dual_duration, n.dual_frequency);
 
